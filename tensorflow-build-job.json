@@ -225,7 +225,7 @@
                 "appName": "${APPLICATION_NAME}"
             }
           },
-          "type": "kubernetes.io/ssh-auth",
+          "type": "Opaque",
           "stringData": {
             "ssh-privatekey": "${PAGURE_SSH_PRIVATE_KEY}",
             "git-token": "${GIT_TOKEN}"
@@ -430,7 +430,7 @@
             "name": "GIT_TOKEN",
             "description": "GIT_TOKEN",
             "value": "",
-            "required": true
+            "required": false
         },
         {
             "name": "GIT_RELEASE_REPO",

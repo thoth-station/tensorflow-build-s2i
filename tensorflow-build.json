@@ -533,7 +533,7 @@
             "name": "GIT_TOKEN",
             "description": "GIT_TOKEN",
             "value": "",
-            "required": true
+            "required": false
         },
         {
             "name": "GIT_RELEASE_REPO",
