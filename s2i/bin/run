@@ -425,7 +425,7 @@ else
 							source ../pagure_commit.sh "${NOTES}" "${FILES}" "${whlff}"
 						else
 							git clone $GIT_RELEASE_REPO
-							cd wheel
+							cd wheels
 							source ../release.sh "${GIT_TAG}" "${RELEASE_NAME}" "${NOTES}" "${GIT_TOKEN}" "${FILES}"
 						fi
 					} | tee -a test_wheel.log 

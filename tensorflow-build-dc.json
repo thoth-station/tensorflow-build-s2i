@@ -195,7 +195,7 @@
                                     },
                                     {
                                         "name": "PAGURE_COMMIT_REPO",
-                                        "value": "$PAGURE_COMMIT_REPO}"
+                                        "value": "${PAGURE_COMMIT_REPO}"
                                     },
                                     {
                                         "name": "USE_PAGURE_COMMIT",
