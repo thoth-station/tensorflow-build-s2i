@@ -42,7 +42,7 @@ echo "PATH = "$PATH
 echo "JAVA_HOME = "$JAVA_HOME
 echo "PYTHON_LIB_PATH ="$PYTHON_LIB_PATH
 echo "LD_LIBRARY_PATH ="$LD_LIBRARY_PATH
-echo "PYTHON_BIN_PATH ="$PYTHON_BIN_PATH 
+echo "PYTHON_BIN_PATH ="$PYTHON_BIN_PATH
 
 ### These ENVs are used in build/publish logic
 echo "PORT = "$PORT
@@ -116,9 +116,9 @@ fi
 #/opt/rh/python27/root/usr/include/python2.7/Python.h
 #rpm -ql python-devel  | grep Python.h
 #/usr/include/python2.7/Python.h
-#rpm -ql rh-python35-scldevel  | grep Python.h 
+#rpm -ql rh-python35-scldevel  | grep Python.h
 # /opt/rh/rh-python35/root/usr/include/python3.5m/Python.h
-#rpm -ql rh-python36-scldevel  | grep Python.h 
+#rpm -ql rh-python36-scldevel  | grep Python.h
 # /opt/rh/rh-python36/root/usr/include/python3.6m/Python.h
 #/opt/rh/python27/root/usr/lib64/
 # scl python
@@ -129,11 +129,11 @@ fi
 #python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
 #/opt/rh/rh-python36/root/usr/lib/python3.6/site-packages
 #
-# 
-#export PYTHON_LIB_PATH=/opt/rh/python27/root/usr/lib/python2.7/site-packages && 
+#
+#export PYTHON_LIB_PATH=/opt/rh/python27/root/usr/lib/python2.7/site-packages &&
 
 
-# only for 2.7 
+# only for 2.7
 #/usr/include/python2.7/
 #/usr/lib64/python2.7
 #Requirement already up-to-date: pip in /usr/lib/python2.7/site-packages (10.0.1)
@@ -149,7 +149,7 @@ fi
 
 OSVER=$(. /etc/os-release;echo $ID)
 echo "OSVER = "$OSVER
-if [ "$NB_PYTHON_VER" = "2.7" ] ; then 
+if [ "$NB_PYTHON_VER" = "2.7" ] ; then
 	if [[ "$OSVER" = "rhel" ]] || [[ "$OSVER" = "centos" ]] ; then
 		echo "$OSVER-$NB_PYTHON_VER"  &&
 		export LD_LIBRARY_PATH=/usr/include/python2.7/:/usr/lib64:/usr/lib64/python2.7:/opt/rh/python27/root/usr/include:/opt/rh/python27/root/usr/lib64/:/opt/rh/python27/root/usr/include/python2.7/:/usr/local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} &&
@@ -169,25 +169,25 @@ if [ "$NB_PYTHON_VER" = "2.7" ] ; then
 		echo "LD_LIBRARY_PATH ="$LD_LIBRARY_PATH  &&
 		echo "PYTHONPATH ="$PYTHONPATH  &&
 		echo "CPATH ="$CPATH  &&
-		echo "PATH ="$PATH  &&  
+		echo "PATH ="$PATH  &&
 		echo "LIBRARY_PATH ="$LIBRARY_PATH  &&
-		echo "PYTHON_INCLUDE_PATH ="$PYTHON_INCLUDE_PATH  && 
+		echo "PYTHON_INCLUDE_PATH ="$PYTHON_INCLUDE_PATH  &&
 		echo "PYTHON_LIB_PATH ="$PYTHON_LIB_PATH ;
 	fi
 	if [[ "$OSVER" = "fedora" ]] ; then
 		echo "$OSVER-$NB_PYTHON_VER"  &&
-		export LD_LIBRARY_PATH="/usr/lib64:/usr/local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" && 
+		export LD_LIBRARY_PATH="/usr/lib64:/usr/local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" &&
 		export PYTHON_INCLUDE_PATH=/usr/include/python2.7/ &&
 		echo "PYTHON_H="`rpm -ql python-devel | grep Python.h` &&
 		echo "LD_LIBRARY_PATH ="$LD_LIBRARY_PATH  &&
-		echo "CPATH ="$CPATH  && 
-		echo "PATH ="$PATH  && 
+		echo "CPATH ="$CPATH  &&
+		echo "PATH ="$PATH  &&
 		echo "LIBRARY_PATH ="$LIBRARY_PATH  &&
-		echo "PYTHON_INCLUDE_PATH ="$PYTHON_INCLUDE_PATH  && 
+		echo "PYTHON_INCLUDE_PATH ="$PYTHON_INCLUDE_PATH  &&
 		echo "PYTHON_LIB_PATH ="$PYTHON_LIB_PATH ;
 	fi
 fi
-if [ "$NB_PYTHON_VER" = "3.5" ] ; then 
+if [ "$NB_PYTHON_VER" = "3.5" ] ; then
 	if [[ "$OSVER" = "rhel" ]] || [[ "$OSVER" = "centos" ]] ; then
 		echo "$OSVER-$NB_PYTHON_VER"  &&
 		export PATH=/opt/rh/rh-python35/root/usr/bin${PATH:+:${PATH}}
@@ -201,25 +201,25 @@ if [ "$NB_PYTHON_VER" = "3.5" ] ; then
 		echo "PYTHON_H="`rpm -ql rh-python35-python-devel | grep Python.h` &&
 		echo "LD_LIBRARY_PATH ="$LD_LIBRARY_PATH  &&
 		echo "CPATH ="$CPATH  &&
-		echo "PATH ="$PATH  &&  
+		echo "PATH ="$PATH  &&
 		echo "LIBRARY_PATH ="$LIBRARY_PATH  &&
-		echo "PYTHON_INCLUDE_PATH ="$PYTHON_INCLUDE_PATH  && 
+		echo "PYTHON_INCLUDE_PATH ="$PYTHON_INCLUDE_PATH  &&
 		echo "PYTHON_LIB_PATH ="$PYTHON_LIB_PATH ;
 	fi
 	if [[ "$OSVER" = "fedora" ]] ; then
 		echo "$OSVER-$NB_PYTHON_VER"  &&
-		export LD_LIBRARY_PATH="/usr/lib64:/usr/local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" && 
-		export PYTHON_INCLUDE_PATH=/usr/include/python3.5m/ && 
+		export LD_LIBRARY_PATH="/usr/lib64:/usr/local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" &&
+		export PYTHON_INCLUDE_PATH=/usr/include/python3.5m/ &&
 		echo "PYTHON_H="`rpm -ql python3-devel | grep Python.h` &&
 		echo "LD_LIBRARY_PATH ="$LD_LIBRARY_PATH  &&
-		echo "CPATH ="$CPATH  && 
-		echo "PATH ="$PATH  && 
+		echo "CPATH ="$CPATH  &&
+		echo "PATH ="$PATH  &&
 		echo "LIBRARY_PATH ="$LIBRARY_PATH  &&
-		echo "PYTHON_INCLUDE_PATH ="$PYTHON_INCLUDE_PATH  && 
+		echo "PYTHON_INCLUDE_PATH ="$PYTHON_INCLUDE_PATH  &&
 		echo "PYTHON_LIB_PATH ="$PYTHON_LIB_PATH ;
 	fi
-fi 
-if [ "$NB_PYTHON_VER" = "3.6" ] ; then 
+fi
+if [ "$NB_PYTHON_VER" = "3.6" ] ; then
 	if [[ "$OSVER" = "rhel" ]] || [[ "$OSVER" = "centos" ]] ; then
 		echo "$OSVER-$NB_PYTHON_VER"  &&
 		export PATH=/opt/rh/rh-python36/root/usr/bin${PATH:+:${PATH}}
@@ -232,22 +232,22 @@ if [ "$NB_PYTHON_VER" = "3.6" ] ; then
 		export XDG_DATA_DIRS="/opt/rh/rh-python36/root/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}" &&
 		echo "PYTHON_H="`rpm -ql rh-python36-python-devel | grep Python.h` &&
 		echo "LD_LIBRARY_PATH ="$LD_LIBRARY_PATH  &&
-		echo "CPATH ="$CPATH  && 
-		echo "PATH ="$PATH  && 
+		echo "CPATH ="$CPATH  &&
+		echo "PATH ="$PATH  &&
 		echo "LIBRARY_PATH ="$LIBRARY_PATH  &&
-		echo "PYTHON_INCLUDE_PATH ="$PYTHON_INCLUDE_PATH  && 
+		echo "PYTHON_INCLUDE_PATH ="$PYTHON_INCLUDE_PATH  &&
 		echo "PYTHON_LIB_PATH ="$PYTHON_LIB_PATH ;
 	fi
 	if [[ "$OSVER" = "fedora" ]] ; then
 		echo "$OSVER-$NB_PYTHON_VER"  &&
-		export LD_LIBRARY_PATH="/usr/lib64:/usr/local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" && 
-		export PYTHON_INCLUDE_PATH=/usr/include/python3.6m/ && 
+		export LD_LIBRARY_PATH="/usr/lib64:/usr/local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" &&
+		export PYTHON_INCLUDE_PATH=/usr/include/python3.6m/ &&
 		echo "PYTHON_H="`rpm -ql python3-devel | grep Python.h` &&
 		echo "LD_LIBRARY_PATH ="$LD_LIBRARY_PATH  &&
-		echo "CPATH ="$CPATH  && 
-		echo "PATH ="$PATH  && 
+		echo "CPATH ="$CPATH  &&
+		echo "PATH ="$PATH  &&
 		echo "LIBRARY_PATH ="$LIBRARY_PATH  &&
-		echo "PYTHON_INCLUDE_PATH ="$PYTHON_INCLUDE_PATH  && 
+		echo "PYTHON_INCLUDE_PATH ="$PYTHON_INCLUDE_PATH  &&
 		echo "PYTHON_LIB_PATH ="$PYTHON_LIB_PATH ;
 	fi
 fi
@@ -261,12 +261,12 @@ cd /workspace
 command_exists () { type "$1" &> /dev/null ; }
 file_exists () { test -f $1 ; }
 folder_exists () { test -d $1 ; }
-if command_exists bazel ; then 
-	echo "bazel command exists."; 
-else 
-	echo "bazel doesnt exists" && cd /tf/tools/ && 
-	./bazel-$BAZEL_VERSION-installer-linux-x86_64.sh --user && 
-	export PATH=$HOME/bin:$PATH && bazel && echo "PATH = "$PATH ; 
+if command_exists bazel ; then
+	echo "bazel command exists.";
+else
+	echo "bazel doesnt exists" && cd /tf/tools/ &&
+	./bazel-$BAZEL_VERSION-installer-linux-x86_64.sh --user &&
+	export PATH=$HOME/bin:$PATH && bazel && echo "PATH = "$PATH ;
 fi
 
 ### git clone tf
@@ -290,7 +290,7 @@ echo "PATH = "$PATH
 ### NO GPU support yet
 ###########################
 echo "TF_NEED_CUDA = "$TF_NEED_CUDA
-if [ $TF_NEED_CUDA = "1" ]; then 
+if [ $TF_NEED_CUDA = "1" ]; then
 	echo "####################################"
 	echo "      CUDA BUILD TODO.....       	  "
 	echo "####################################"
@@ -299,7 +299,7 @@ if [ $TF_NEED_CUDA = "1" ]; then
 	#sed -i.bak 's/@org_tensorflow\/\/third_party\/gpus\/crosstool/@local_config_cuda\/\/crosstool:toolchain/g' tools/bazel.rc
 	#cd /workspace/serving/
 	#sed -i.bak 's/@org_tensorflow\/\/third_party\/gpus\/crosstool/@local_config_cuda\/\/crosstool:toolchain/g' tools/bazel.rc
-fi 
+fi
 
 #bazel build -c opt --config=cuda --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" --verbose_failures //tensorflow/tools/pip_package:build_pip_package
 #bazel build -c opt --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" --verbose_failures //tensorflow/tools/pip_package:build_pip_package
@@ -307,7 +307,7 @@ fi
 #bazel build -c opt --config=cuda --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" --local_resources 2048,2.0,1.0 --verbose_failures //tensorflow/tools/pip_package:build_pip_package
 #bazel build -c opt --config=cuda --spawn_strategy=standalone --verbose_failures //tensorflow_serving/model_servers:tensorflow_model_server
 
-### enable TEST_LOOP only which deployment config and NOT with Jobs. 
+### enable TEST_LOOP only which deployment config and NOT with Jobs.
 if [[ $TEST_LOOP = "y" ]]
 then
 	echo "####################################"
@@ -360,9 +360,9 @@ else
 		    ## cleanup old
 		    rm -fr /tmp/test_wheel/tensorflow*
 		    rm -fr /tmp/test_wheel/*.yaml
-		    cp /workspace/bins/*.whl /tmp/test_wheel && cp /workspace/bins/*.yaml /tmp/test_wheel 
-		    cd /tmp/test_wheel && pwd && ls -l 
-		    
+		    cp /workspace/bins/*.whl /tmp/test_wheel && cp /workspace/bins/*.yaml /tmp/test_wheel
+		    cd /tmp/test_wheel && pwd && ls -l
+
 		 	echo "which_pip_version="`pip --version `
 		    (pip install *.whl --user) 2>&1 | tee -a test_wheel.log ; test ${PIPESTATUS[0]} -eq 0
 		    if (( $? )); then
@@ -392,11 +392,11 @@ else
 						echo
 						echo "METADATA..."
 						pwd
-						grep -e "Platform" -e "Author-email"   -e "Author"  -e "Disclaimer" *.dist-info/METADATA 
+						grep -e "Platform" -e "Author-email"   -e "Author"  -e "Disclaimer" *.dist-info/METADATA
 						sed -i "s/Platform.*/Platform: $(cat /etc/redhat-release)\\nKernel: $(uname -or |awk '{print $1;}')/" *.dist-info/METADATA
 						sed -i "s/Author-email:.*/Author-email: smodeel@redhat.com/" *.dist-info/METADATA
 						sed -i "s/Author:.*/Author: Red Hat Inc./" *.dist-info/METADATA
-						
+
 						DISCLAIMER="$(cat <<-EOF
 						Disclaimer: Following wheel files are created by Red Hat AICoE experimental builds and are without any support.
 						There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -416,7 +416,7 @@ else
 						whlff=$(basename `ls  *.whl` .whl )
 						mv /workspace/bins/*.whl /workspace/bins/$whlff.whl.bkp
 						cp *.whl /workspace/bins/
-						pip uninstall tensorflow -y 
+						pip uninstall tensorflow -y
 						pip install /workspace/bins/*.whl --user
 						ls -l /workspace/bins
 						#release
@@ -446,7 +446,7 @@ else
 						ls -l
 						git clone $GIT_RELEASE_REPO
 						cd tensorflow-wheels
-						source ../release.sh "${GIT_TAG}" "${TENSORFLOW_BUILD_DIR_NAME}" "${NOTES}" "${GIT_TOKEN}" "${FILES}"
+						# source ../release.sh "${GIT_TAG}" "${TENSORFLOW_BUILD_DIR_NAME}" "${NOTES}" "${GIT_TOKEN}" "${FILES}"
 						# if [[ "$USE_PAGURE_COMMIT" == "1" ]]; then
 						# 	git clone $PAGURE_COMMIT_REPO
 						# 	cd tensorflow
@@ -468,7 +468,7 @@ else
 						# 	cd tensorflow-wheels
 						# 	source ../release.sh "${GIT_TAG}" "${TENSORFLOW_BUILD_DIR_NAME}" "${NOTES}" "${GIT_TOKEN}" "${FILES}"
 						# fi
-					} | tee -a test_wheel.log 
+					} | tee -a test_wheel.log
 				fi
 			fi
 			if ls -l  /tmp/test_wheel/test_wheel.log; then
@@ -482,21 +482,17 @@ if ls -l  /workspace/build.log; then
 fi
 
 
-### enable HOST_ON_HTTP_SERVER only which deployment config and NOT with Jobs. 
+### enable HOST_ON_HTTP_SERVER only which deployment config and NOT with Jobs.
 if [[ $HOST_ON_HTTP_SERVER = "y" ]]
 then
 	echo "Starting httpserver to host the binary...\n"
     cd /workspace/
-	if [[ $NB_PYTHON_VER = "2.7" ]] ; then 
-		python -m SimpleHTTPServer $PORT ; 
-	else python -m http.server $PORT ; 
+	if [[ $NB_PYTHON_VER = "2.7" ]] ; then
+		python -m SimpleHTTPServer $PORT ;
+	else python -m http.server $PORT ;
 	fi
 fi
 
 						#source /tmp/release_dir/tf_env_collect.sh
 						#mv tf_env.txt /workspace/bins/
 						#cp /workspace/bins/tf_env.txt /tmp/release_dir/
-
-
-
-

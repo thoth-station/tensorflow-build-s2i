@@ -1,0 +1,59 @@
+def project = "tensorflow"
+
+def buildTargets = [
+  "fedora28": "registry.fedoraproject.org/f28/s2i-core",
+  "centos7": "openshift/base-centos7"
+]
+
+def pythonVersions = ["3.6"]
+
+def templates = ["tensorflow-build-image.json", "tensorflow-build-job.json"]
+
+node {
+  try {
+    stage("Checkout") {
+      checkout scm
+    }
+
+    stage("Create Templates") {
+      openshift.withCluster() {
+        openshift.withProject(project) {
+          templates.each { template ->
+            def templateFileName = template.take(template.lastIndexOf("."))
+            def templateSelector = openshift.selector("template", templateFileName)
+
+            if (!templateSelector.exists()) {
+              openshift.create(readFile(template))
+            } else {
+              openshift.replace(readFile(template))
+            }
+          }
+        }
+      }
+    }
+
+    stage("Tensorflow-Trigger") {
+      def builds = [:]
+
+      buildTargets.each { operatingSystem, registry ->
+        pythonVersions.each { pythonVersion ->
+          builds["tensorflow-${operatingSystem}-${pythonVersion}"] = {
+            build job: "tensorflow-${operatingSystem}-${pythonVersion}",
+              parameters: [
+                string(name: 'OPERATING_SYSTEM', value: "${operatingSystem}"),
+                string(name: 'REGISTRY', value: "${registry}"),
+                string(name: 'PYTHON_VERSION', value: "${pythonVersion}"),
+              ]
+          }
+        }
+      }
+
+      parallel builds
+    }
+  } catch (e) {
+    echo e.toString()
+    throw e
+  } finally {
+    // Finally
+  }
+}
