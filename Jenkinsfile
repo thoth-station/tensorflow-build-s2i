@@ -11,44 +11,52 @@ node {
 
   openshift.withCluster() {
     openshift.withProject(project) {
-      try {
-        stage("Build Image") {
-          def tensorflowImageTemplate = openshift.selector("template", "tensorflow-build-image").object()
-          builderImageStream = openshift.process(
-            tensorflowImageTemplate,
-            "-p", "APPLICATION_NAME=tf-${operatingSystem}-build-image-${pythonVersionNoDecimal}",
-            "-p", "S2I_IMAGE=${registry}",
-            "-p", "DOCKER_FILE_PATH=Dockerfile.${operatingSystem}",
-            "-p", "NB_PYTHON_VER=${pythonVersion}"
-          )
-          def thing = openshift.create(builderImageStream)
-          thing.describe()
-          thing.narrow('bc').logs('-f')
-        }
-
-        stage("Build Job") {
-          def tensorflowJobTemplate = openshift.selector("template", "tensorflow-build-job").object()
-          buildJob = openshift.process(
-            tensorflowJobTemplate,
-            "-p", "APPLICATION_NAME=tf-${operatingSystem}-build-job-${pythonVersionNoDecimal}",
-            "-p", "BUILDER_IMAGESTREAM=tf-${operatingSystem}-build-image-${pythonVersionNoDecimal}",
-            "-p", "NB_PYTHON_VER=${pythonVersion}",
-            "-p", "SESHETA_GITHUB_ACCESS_TOKEN=test"
-          )
-          def thing = openshift.create(buildJob)
-          def pods = thing.related('pods')
-          pods.untilEach {
-            return (it.object().status.phase == "Running")
+      withCredentials([[$class: 'StringBinding', credentialsId: 'GIT_TOKEN', variable: 'GIT_TOKEN']]) {
+        try {
+          stage("Build Image") {
+            def tensorflowImageTemplate = openshift.selector("template", "tensorflow-build-image").object()
+            builderImageStream = openshift.process(
+              tensorflowImageTemplate,
+              "-p", "APPLICATION_NAME=tf-${operatingSystem}-build-image-${pythonVersionNoDecimal}",
+              "-p", "S2I_IMAGE=${registry}",
+              "-p", "DOCKER_FILE_PATH=Dockerfile.${operatingSystem}",
+              "-p", "NB_PYTHON_VER=${pythonVersion}"
+            )
+            def createdImageStream = openshift.create(builderImageStream)
+            createdImageStream.describe()
+            createdImageStream.narrow('bc').logs('-f')
           }
-          pods.logs("-f")
-        }
-      } catch (e) {
-        echo e.toString()
-        throw e
-      } finally {
-        stage("Cleanup") {
-          openshift.delete(builderImageStream)
-          openshift.delete(buildJob)
+
+          stage("Build Job") {
+            def tensorflowJobTemplate = openshift.selector("template", "tensorflow-build-job").object()
+            buildJob = openshift.process(
+              tensorflowJobTemplate,
+              "-p", "APPLICATION_NAME=tf-${operatingSystem}-build-job-${pythonVersionNoDecimal}",
+              "-p", "BUILDER_IMAGESTREAM=tf-${operatingSystem}-build-image-${pythonVersionNoDecimal}",
+              "-p", "NB_PYTHON_VER=${pythonVersion}",
+              "-p", "GIT_RELEASE_REPO=https://github.com/werne2j/tensorflow-wheels", // Remove after test
+              "-p", "SESHETA_GITHUB_ACCESS_TOKEN=${env.GIT_TOKEN}"
+            )
+            def createdJob = openshift.create(buildJob)
+            def pods = createdJob.related('pods')
+            pods.untilEach {
+              if (it.object().status.phase == "Failed") {
+                echo "Pod failed to start"
+                throw it.object().status
+              }
+
+              return (it.object().status.phase == "Running")
+            }
+            pods.logs("-f")
+          }
+        } catch (e) {
+          echo e.toString()
+          throw e
+        } finally {
+          stage("Cleanup") {
+            openshift.delete(builderImageStream)
+            openshift.delete(buildJob)
+          }
         }
       }
     }

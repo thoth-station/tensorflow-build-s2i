@@ -446,7 +446,7 @@ else
 						ls -l
 						git clone $GIT_RELEASE_REPO
 						cd tensorflow-wheels
-						# source ../release.sh "${GIT_TAG}" "${TENSORFLOW_BUILD_DIR_NAME}" "${NOTES}" "${GIT_TOKEN}" "${FILES}"
+						source ../release.sh "${GIT_TAG}" "${TENSORFLOW_BUILD_DIR_NAME}" "${NOTES}" "${GIT_TOKEN}" "${FILES}"
 						# if [[ "$USE_PAGURE_COMMIT" == "1" ]]; then
 						# 	git clone $PAGURE_COMMIT_REPO
 						# 	cd tensorflow

@@ -11,6 +11,8 @@ def templates = ["tensorflow-build-image.json", "tensorflow-build-job.json"]
 
 node {
   try {
+    echo sh(returnStdout: true, script: 'env')
+
     stage("Checkout") {
       checkout scm
     }
@@ -37,23 +39,45 @@ node {
 
       buildTargets.each { operatingSystem, registry ->
         pythonVersions.each { pythonVersion ->
+
+          if (jenkins.model.Jenkins.instance.getItem("tensorflow-${operatingSystem}-${pythonVersion}") == null) {
+            jobDsl  scriptText: createJob(operatingSystem, pythonVersion)
+          }
+
           builds["tensorflow-${operatingSystem}-${pythonVersion}"] = {
             build job: "tensorflow-${operatingSystem}-${pythonVersion}",
               parameters: [
-                string(name: 'OPERATING_SYSTEM', value: "${operatingSystem}"),
-                string(name: 'REGISTRY', value: "${registry}"),
-                string(name: 'PYTHON_VERSION', value: "${pythonVersion}"),
+                string(name: "OPERATING_SYSTEM", value: "${operatingSystem}"),
+                string(name: "REGISTRY", value: "${registry}"),
+                string(name: "PYTHON_VERSION", value: "${pythonVersion}"),
               ]
           }
         }
       }
 
-      parallel builds
+      // parallel builds
     }
   } catch (e) {
     echo e.toString()
     throw e
-  } finally {
-    // Finally
   }
+}
+
+def createJob(operatingSystem, pythonVersion) {
+  return """
+    pipelineJob("tensorflow-${operatingSystem}-${pythonVersion}") {
+      parameters {
+        stringParam("OPERATING_SYSTEM")
+        stringParam("REGISTRY")
+        stringParam("PYTHON_VERSION")
+      }
+      definition {
+        cpsScm {
+          scm {
+            git("https://github.com/werne2j/tensorflow-build-s2i", "*/newPipeline")
+          }
+        }
+      }
+    }
+  """
 }
