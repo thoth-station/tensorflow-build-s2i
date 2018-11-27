@@ -11,6 +11,7 @@ def templates = ["tensorflow-build-image.json", "tensorflow-build-job.json"]
 
 node {
   try {
+    echo "Printing Env Vars"
     echo sh(returnStdout: true, script: 'env')
 
     stage("Checkout") {
