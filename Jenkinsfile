@@ -34,7 +34,6 @@ node {
               "-p", "APPLICATION_NAME=tf-${operatingSystem}-build-job-${pythonVersionNoDecimal}",
               "-p", "BUILDER_IMAGESTREAM=tf-${operatingSystem}-build-image-${pythonVersionNoDecimal}",
               "-p", "NB_PYTHON_VER=${pythonVersion}",
-              "-p", "GIT_RELEASE_REPO=https://github.com/werne2j/tensorflow-wheels", // Remove after test
               "-p", "SESHETA_GITHUB_ACCESS_TOKEN=${env.GIT_TOKEN}"
             )
             def createdJob = openshift.create(buildJob)

@@ -56,7 +56,7 @@ node {
         }
       }
 
-      // parallel builds
+      parallel builds
     }
   } catch (e) {
     echo e.toString()
@@ -75,7 +75,7 @@ def createJob(operatingSystem, pythonVersion) {
       definition {
         cpsScm {
           scm {
-            git("https://github.com/werne2j/tensorflow-build-s2i", "*/newPipeline")
+            git("https://github.com/thoth-station/tensorflow-build-s2i", "*/master")
           }
         }
       }
