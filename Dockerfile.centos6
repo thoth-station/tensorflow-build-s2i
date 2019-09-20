@@ -13,63 +13,78 @@ LABEL io.k8s.description="S2I builder for Tensorflow binaries." \
       io.openshift.s2i.scripts-url="image:///usr/libexec/s2i"
 
 # Following should be passed as build-args
-ARG BAZEL_VERSION=0.18.0
+ARG BAZEL_VERSION=0.24.1
 ARG DEV_TOOLSET_VERSION=7
 ARG PYTHON_VERSION=3.6
 # https://github.com/tensorflow/tensorflow/blob/master/tensorflow/tools/ci_build/install/install_pip_packages.sh
 ARG PIP_LIST="wheel==0.31.1 setuptools==39.1.0 six==1.12.0 absl-py protobuf==3.6.1 enum34 futures mock numpy pixiedust pillow pyaml keras_applications==1.0.8 keras_preprocessing==1.0.5 tf-estimator-nightly"
 
-ENV BAZEL_VERSION=$BAZEL_VERSION
-ENV DEV_TOOLSET_VERSION=$DEV_TOOLSET_VERSION
-ENV PIP_LIST=$PIP_LIST
-ENV PYTHON_VERSION=$PYTHON_VERSION
+ENV BAZEL_VERSION=$BAZEL_VERSION \
+	DEV_TOOLSET_VERSION=$DEV_TOOLSET_VERSION \
+	PIP_LIST=$PIP_LIST \
+	PYTHON_VERSION=$PYTHON_VERSION
 
 
 # fix fatal: unable to look up current user in the passwd file: no such user
-ENV GIT_COMMITTER_NAME=sub-mod
-ENV GIT_COMMITTER_NAME=subin@apache.org
+ENV GIT_COMMITTER_NAME=sub-mod \
+	GIT_COMMITTER_NAME=subin@apache.org
 
 
 # Not essential, but wise to set the lang
 # Note: Users with other languages should set this in their derivative image
-ENV LANGUAGE en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LC_ALL=""
-ENV PYTHONIOENCODING UTF-8
-ENV NB_USER=default
-ENV NB_UID=1001
-ENV PYTHON_BIN_PATH=/usr/bin/python 
-ENV TINI_VERSION=v0.18.0
+ENV LANGUAGE=en_US.UTF-8 \
+	LANG=en_US.UTF-8 \
+	LC_ALL="" \
+	PYTHONIOENCODING=UTF-8 \
+	NB_USER=default \
+	NB_UID=1001 \
+	PYTHON_BIN_PATH=/usr/bin/python \
+	TINI_VERSION=v0.18.0
+	
 
 ## Bazel
-ENV PYTHON_LIB_PATH=/usr/lib64/python$PYTHON_VERSION/site-packages
-ENV LD_LIBRARY_PATH="/usr/local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
-ENV BAZELRC /root/.bazelrc
+ENV PYTHON_LIB_PATH="/usr/lib64/python$PYTHON_VERSION/site-packages" \
+	LD_LIBRARY_PATH="/usr/local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" \
+	BAZELRC="/root/.bazelrc"
 
 ################################################
 ## Tensorflow ./configure options for Bazel
 ################################################
-ENV PYTHON_BIN_PATH=/usr/bin/python
-ENV CC_OPT_FLAGS -march=native
-ENV TF_NEED_JEMALLOC 1
-ENV TF_NEED_GCP 0
-ENV TF_NEED_VERBS 0
-ENV TF_NEED_HDFS 0
-ENV TF_ENABLE_XLA 0
-ENV TF_NEED_OPENCL 0
-ENV TF_NEED_CUDA 0
-ENV TF_NEED_MPI 0
-ENV TF_NEED_GDR 0
-ENV TF_NEED_S3 0
-ENV TF_NEED_KAFKA 0
-ENV TF_NEED_IGNITE 0
-ENV TF_NEED_ROCM 0
-ENV TF_NEED_OPENCL_SYCL 0
-ENV TF_DOWNLOAD_CLANG 0
-ENV TF_SET_ANDROID_WORKSPACE 0
-ENV PATH /usr/local/bin:$PATH:/home/default/.local/bin
+ENV PYTHON_BIN_PATH=/usr/bin/python \
+	CC_OPT_FLAGS="-march=native" \
+	TF_CUDA_VERSION=10.0 \
+	TF_CUDA_COMPUTE_CAPABILITIES=3.0,3.5,5.2,6.0,6.1,7.0 \
+	TF_CUDNN_VERSION=7 \
+	TF_NEED_OPENCL_SYCL=0 \
+	GCC_HOST_COMPILER_PATH="/opt/rh/devtoolset-$DEV_TOOLSET_VERSION/root/usr/bin/gcc" \
+	GCC_HOST_COMPILER_PREFIX="/opt/rh/devtoolset-$DEV_TOOLSET_VERSION/root/usr/bin" \
+	TF_CUDA_CLANG=0 \
+	CUDA_TOOLKIT_PATH=/usr/local/cuda \
+	CUDNN_INSTALL_PATH=/usr/local/cuda \
+	TF_NEED_JEMALLOC=0 \
+	TF_NEED_GCP=0 \
+	TF_NEED_VERBS=0 \
+	TF_NEED_HDFS=0 \
+	TF_ENABLE_XLA=0 \
+	TF_NEED_OPENCL=0 \
+	TF_NEED_CUDA=1 \
+	TF_NEED_MPI=0 \
+	TF_NEED_GDR=0 \
+	TF_NEED_S3=0 \
+	TF_NEED_AWS=0 \
+	TF_NEED_KAFKA=0 \
+	TF_NEED_OPENCL_SYCL=0 \
+	TF_DOWNLOAD_CLANG=0 \
+	TF_SET_ANDROID_WORKSPACE=0 \
+	TF_NEED_TENSORRT=0 \
+	TF_NEED_ROCM=0 \
+	TF_NEED_IGNITE=0 \
+	TF_SET_ANDROID_WORKSPACE=0 \
+	PATH="/usr/local/bin:$PATH:/home/default/.local/bin" \
+	JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-1.8.0*"
+	
 # ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk.x86_64/
-ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-1.8.0*
+
 
 
 
