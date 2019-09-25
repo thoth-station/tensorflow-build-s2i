@@ -1,0 +1,189 @@
+FROM quay.io/harshad16/cuda-cento6-base
+
+LABEL maintainer="Subin Modeel <smodeel@redhat.com>"
+
+USER root
+
+ENV BUILDER_VERSION 1.0
+
+LABEL io.k8s.description="S2I builder for Tensorflow binaries." \
+      io.k8s.display-name="Tensorflow BUILD" \
+      io.openshift.expose-services="8080:http" \
+      io.openshift.tags="builder,python,tf-build" \
+      io.openshift.s2i.scripts-url="image:///usr/libexec/s2i"
+
+# Following should be passed as build-args
+ARG BAZEL_VERSION=0.18.0
+ARG DEV_TOOLSET_VERSION=7
+ARG PYTHON_VERSION=3.6
+# https://github.com/tensorflow/tensorflow/blob/master/tensorflow/tools/ci_build/install/install_pip_packages.sh
+ARG PIP_LIST="wheel==0.31.1 setuptools==39.1.0 six==1.12.0 absl-py protobuf==3.6.1 enum34 futures mock numpy pixiedust pillow pyaml keras_applications==1.0.8 keras_preprocessing==1.0.5 tf-estimator-nightly"
+
+ENV BAZEL_VERSION=$BAZEL_VERSION
+ENV DEV_TOOLSET_VERSION=$DEV_TOOLSET_VERSION
+ENV PIP_LIST=$PIP_LIST
+ENV PYTHON_VERSION=$PYTHON_VERSION
+
+
+# fix fatal: unable to look up current user in the passwd file: no such user
+ENV GIT_COMMITTER_NAME=sub-mod
+ENV GIT_COMMITTER_NAME=subin@apache.org
+
+
+# Not essential, but wise to set the lang
+# Note: Users with other languages should set this in their derivative image
+ENV LANGUAGE en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LC_ALL=""
+ENV PYTHONIOENCODING UTF-8
+ENV NB_USER=default
+ENV NB_UID=1001
+ENV PYTHON_BIN_PATH=/usr/bin/python
+ENV TINI_VERSION=v0.18.0
+
+## Bazel
+ENV PYTHON_LIB_PATH=/usr/lib64/python$PYTHON_VERSION/site-packages
+ENV LD_LIBRARY_PATH="/usr/local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+ENV BAZELRC /root/.bazelrc
+
+################################################
+## Tensorflow ./configure options for Bazel
+################################################
+ENV PYTHON_BIN_PATH=/usr/bin/python
+ENV CC_OPT_FLAGS -march=native
+ENV TF_NEED_JEMALLOC 1
+ENV TF_NEED_GCP 0
+ENV TF_NEED_VERBS 0
+ENV TF_NEED_HDFS 0
+ENV TF_ENABLE_XLA 0
+ENV TF_NEED_OPENCL 0
+ENV TF_NEED_CUDA 0
+ENV TF_NEED_MPI 0
+ENV TF_NEED_GDR 0
+ENV TF_NEED_S3 0
+ENV TF_NEED_KAFKA 0
+ENV TF_NEED_IGNITE 0
+ENV TF_NEED_ROCM 0
+ENV TF_NEED_OPENCL_SYCL 0
+ENV TF_DOWNLOAD_CLANG 0
+ENV TF_SET_ANDROID_WORKSPACE 0
+ENV PATH /usr/local/bin:$PATH:/home/default/.local/bin
+# ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk.x86_64/
+ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-1.8.0*
+
+
+
+## TODO : (check again)sourcestrategy can't be used for bazel because git clone doesnt work here
+
+RUN yum install -y centos-release-scl \
+    && yum install -y vim gcc gcc-c++ clang glibc-devel make openssl-devel automake autoconf gpg devtoolset-$DEV_TOOLSET_VERSION \
+    && yum install -y rh-python36 rh-python35 python27 \
+    && yum install -y which findutils x86info cpuid dmidecode procps perf \
+    && yum install -y kernel-devel swig zip unzip gzip libtool binutils \
+    && yum install -y freetype-devel libpng12-devel zlib-devel giflib-devel zeromq3-devel \
+    && yum install -y libxml2 libxml2-devel libxslt libxslt-devel \
+    && yum install -y java-1.8.0-openjdk java-1.8.0-openjdk-devel patch gdb file pciutils cmake \
+    && yum install -y tar tree git curl wget java-headless bzip2 gnupg2 sqlite protobuf-compiler \
+	&& mkdir -p /opt/app-root && cd /opt/app-root/ && curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+
+RUN wget https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini -P /tmp \
+    && wget https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini.asc -P /tmp \
+    && cd /tmp \
+    && \
+    TINI_GPGKEY=595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7; \
+    found=''; \
+    for server in \
+        ha.pool.sks-keyservers.net \
+        hkp://keyserver.ubuntu.com:80 \
+        hkp://p80.pool.sks-keyservers.net:80 \
+        pgp.mit.edu \
+    ; do \
+        echo "Fetching GPG key $TINI_GPGKEY from $server"; \
+        gpg --batch --keyserver "$server" --recv-keys "$TINI_GPGKEY" && found=yes && break; \
+    done; \
+    test -z "$found" && echo >&2 "ERROR: failed to fetch GPG key $TINI_GPGKEY" && exit 1; \
+    gpg --batch --verify /tmp/tini.asc /tmp/tini \
+    && mv /tmp/tini /usr/local/bin/tini \
+    && chmod +x /usr/local/bin/tini
+
+# Building Bazel from scratch...ln: creating symbolic link `/tmp/bazel_MNfSO5Ln/embedded_tools/tools/jdk/BUILD.pkg': Permission denied
+# ERROR: /workspace/tensorflow/core/kernels/BUILD:3206:1: C++ compilation of rule '//tensorflow/core/kernels:reduction_ops' failed (Exit 1): gcc failed: error executing command
+RUN chown -R 1001:1001 /opt/app-root  \
+    && chgrp -R root /opt/app-root  \
+    && chmod -R ug+rwx /opt/app-root \
+    && cd /opt/app-root/ \
+    && chmod a+rw /etc/passwd \
+	&& wget -q https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-dist.zip \
+    && chmod a+x bazel*.zip \
+	&& unzip bazel*.zip \
+    && if [ "$BAZEL_VERSION" = "0.24.1" ] ; then mkdir -p /opt/app-root/output/ && cd /opt/app-root/output/ ; fi \
+    && if [ "$BAZEL_VERSION" = "0.24.1" ] ; then wget -q https://github.com/sub-mod/bazel-builds/releases/download/0.24.1/bazel-0.24.1 && mv bazel-0.24.1 bazel && chmod a+x bazel; fi
+
+
+# SHELL [ "/usr/bin/scl", "enable", "devtoolset-7" ]
+# RUN gcc -v
+# SHELL [ "/usr/bin/scl", "enable", "rh-python36" ]
+# RUN python -V
+
+# don't use container-entrypoint before running user application
+# use /entrypoint
+COPY ./s2i/bin/ /usr/libexec/s2i
+ADD entrypoint /entrypoint
+RUN chmod +x /entrypoint
+ADD build_tools /build_tools
+
+# need to remove /usr/bin/gcc
+# only possible to do that here and not in run script
+# RUN source /build_tools/setup_devtoolset.sh \
+#     && source /build_tools/setup_python.sh
+
+# Install pip and dependencies for tensorflow build.
+# if [ "$PYTHON_VERSION" = "3.6" ] ; then source scl_source enable rh-python36 ; fi \
+RUN source /build_tools/setup_devtoolset.sh \
+    && source /build_tools/setup_python.sh \
+    && python -V \
+    && gcc -v \
+    && python /opt/app-root/get-pip.py \
+    && source /build_tools/setup_pip.sh \
+    && which pip \
+    && pip -V \
+    && echo $LD_LIBRARY_PATH \
+    && pip install --no-cache-dir --upgrade pip \
+    && cd /opt/app-root/ \
+    && [[ -z "$PIP_LIST" ]] && echo "PIP_LIST is Empty" || for x in $PIP_LIST; do echo "$x">> requirements.txt;  done \
+    && if [ -f requirements.txt ]; then cat requirements.txt ; else echo "requirements.txt doesn't exist"; fi \
+    && if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt ; else echo "requirements.txt doesn't exist"; fi \
+    && usermod -g root $NB_USER \
+    && mkdir -p /workspace \
+    && chown $NB_UID:root /workspace \
+    && chmod 1777 /workspace \
+    && mkdir -p /home/$NB_USER \
+    && chown -R $NB_UID:root /home/$NB_USER \
+    && chmod g+rwX,o+rX -R /home/$NB_USER
+
+# NO CLEANUP
+# Donot add below commands
+#    && yum erase -y gcc gcc-c++ glibc-devel \
+#    && yum clean all -y \
+
+# export PATH=/opt/rh/devtoolset-7/root/usr/bin:${PATH}
+# look at difference between env output
+# need to setup Python separately
+# delete gcc/g++/python in running container for bazel to work.
+
+EXPOSE 8080
+
+ENV HOME /home/$NB_USER
+# This default user is created in the openshift/base-centos7 image
+USER 1001
+# Make the default PWD somewhere that the user can write. This is
+# useful when connecting with 'oc run' and starting a 'spark-shell',
+# which will likely try to create files and directories in PWD and
+# error out if it cannot.
+
+WORKDIR /workspace
+
+ENTRYPOINT ["/entrypoint"]
+
+# TODO: Set the default CMD for the image
+CMD ["/usr/libexec/s2i/usage"]
