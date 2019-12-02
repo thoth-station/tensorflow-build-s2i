@@ -1,0 +1,50 @@
+diff --git a/tensorflow/tensorflow.bzl b/tensorflow/tensorflow.bzli haven
+--- a/tensorflow/tensorflow.bzl
++++ b/tensorflow/tensorflow.bzl
+@@ -486,7 +486,7 @@ def tf_cc_shared_object(
+         srcs = [],
+         deps = [],
+         data = [],
+-        linkopts = [],
++        linkopts = ['-lrt'],
+         framework_so = tf_binary_additional_srcs(),
+         soversion = None,
+         kernels = [],
+@@ -590,7 +590,7 @@ def tf_cc_binary(
+         srcs = [],
+         deps = [],
+         data = [],
+-        linkopts = [],
++        linkopts = ['-lrt'],
+         copts = tf_copts(),
+         kernels = [],
+         per_os_targets = False,  # Generate targets with SHARED_LIBRARY_NAME_PATTERNS
+@@ -681,7 +681,7 @@ def tf_gen_op_wrapper_cc(
+     tf_cc_binary(
+         name = tool,
+         copts = tf_copts(),
+-        linkopts = if_not_windows(["-lm", "-Wl,-ldl"]),
++        linkopts = if_not_windows(["-lm","-lrt","-Wl,-ldl"]),
+         linkstatic = 1,  # Faster to link this one-time-use binary dynamically
+         deps = [op_gen] + deps,
+     )
+@@ -866,7 +866,7 @@ def tf_gen_op_wrapper_py(
+     tf_cc_binary(
+         name = tool_name,
+         copts = tf_copts(),
+-        linkopts = if_not_windows(["-lm", "-Wl,-ldl"]) + cc_linkopts,
++        linkopts = if_not_windows(["-lm","-lrt", "-Wl,-ldl"]) + cc_linkopts,
+         linkstatic = 1,  # Faster to link this one-time-use binary dynamically
+         visibility = [clean_dep("//tensorflow:internal")],
+         deps = ([
+diff --git a/tensorflow/tools/pip_package/build_pip_package.sh b/tensorflow/tools/pip_package/build_pip_package.sh
+--- a/tensorflow/tools/pip_package/build_pip_package.sh
++++ b/tensorflow/tools/pip_package/build_pip_package.sh
+@@ -165,6 +165,7 @@ function prepare_src() {
+   cp tensorflow/tools/pip_package/MANIFEST.in ${TMPDIR}
+   cp tensorflow/tools/pip_package/README ${TMPDIR}
+   cp tensorflow/tools/pip_package/setup.py ${TMPDIR}
++  touch ${TMPDIR}/stub.cc
+
+   rm -f ${TMPDIR}/tensorflow/libtensorflow_framework.so
+   rm -f ${TMPDIR}/tensorflow/libtensorflow_framework.so.[0-9].*
