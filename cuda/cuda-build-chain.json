@@ -382,7 +382,7 @@
                 "source": {
                     "type": "Git",
                     "git": {
-                        "uri": "https://github.com/sclorg/s2i-python-container.git",
+                        "uri": "https://github.com/thoth-station/s2i-python-container.git",
                         "ref": "master"
                     },
                     "contextDir": "${S2I_PYTHON_VERSION}"
@@ -469,7 +469,7 @@
         {
             "name": "SOURCE_REPOSITORY",
             "description": "Git repository for source.",
-            "value": "https://github.com/sub-mod/cuda.git",
+            "value": "https://github.com/thoth-station/cuda.git",
             "required": true
         },
         {
@@ -510,4 +510,3 @@
         }
     ]
 }
-

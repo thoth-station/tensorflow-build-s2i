@@ -240,7 +240,7 @@ objects:
     source:
       type: Git
       git:
-        uri: https://github.com/harshad16/s2i-python-container.git
+        uri: https://github.com/thoth-station/s2i-python-container.git
         ref: master
       contextDir: "${S2I_PYTHON_VERSION}"
     strategy:
@@ -299,7 +299,7 @@ parameters:
   required: true
 - name: SOURCE_REPOSITORY
   description: Git repository for source.
-  value: https://github.com/harshad16/cuda.git
+  value: https://github.com/thoth-station/cuda.git
   required: true
 - name: SOURCE_REPOSITORY_BRANCH
   description: Git repository branch for source.Stay fixed at ubi7 for now.
